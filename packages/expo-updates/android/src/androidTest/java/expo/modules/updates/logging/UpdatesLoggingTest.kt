@@ -71,4 +71,25 @@ class UpdatesLoggingTest : TestCase() {
     val thirdLogs = reader.getLogEntries(thirdTime)
     Assert.assertEquals(0, thirdLogs.size)
   }
+
+  @Test
+  fun testPersistentLog() {
+    val persistentLog = UpdatesPersistentLog()
+    Assert.assertEquals(0, persistentLog.readEntries().size)
+
+    persistentLog.appendEntry(
+      "Test string 1",
+      completionHandler = {
+        Assert.assertNull(it)
+        val entries = persistentLog.readEntries()
+
+        Assert.assertEquals(1, entries.size)
+        Assert.assertEquals("Test string 1", entries[0])
+        persistentLog.clearEntries {
+          Assert.assertNull(it)
+          Assert.assertEquals(0, persistentLog.readEntries().size)
+        }
+      }
+    )
+  }
 }
